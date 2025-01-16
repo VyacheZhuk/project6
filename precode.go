@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Task ...
 type Task struct {
 	ID           string   `json:"id"`
 	Description  string   `json:"description"`
@@ -42,7 +41,7 @@ var tasks = map[string]Task{
 }
 
 // Ниже напишите обработчики для каждого эндпоинта
-func getTask(w http.ResponseWriter, r *http.Request) {
+func getTasks(w http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -75,14 +74,14 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func getTasks(w http.ResponseWriter, r *http.Request) {
+func getTask(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
 	task, ok := tasks[id]
 
 	if !ok {
-		http.Error(w, "Задачи нет", http.StatusNoContent)
+		http.Error(w, "Задача не найдена", http.StatusNoContent)
 		return
 	}
 
@@ -106,6 +105,7 @@ func deleteTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Задача не найдена", http.StatusBadRequest)
 		return
 	}
+
 	tasks[task.ID] = task
 
 	delete(tasks, "task")
@@ -117,12 +117,11 @@ func deleteTask(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := chi.NewRouter()
 
-	// здесь регистрируйте ваши обработчики
-	r.Get("/tasks", getTask)
+	r.Get("/tasks", getTasks)
 
 	r.Post("/tasks", postTask)
 
-	r.Get("/tasks/{id}", getTasks)
+	r.Get("/tasks/{id}", getTask)
 
 	r.Delete("/tasks/{id}", deleteTask)
 
